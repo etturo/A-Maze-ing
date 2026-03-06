@@ -1,13 +1,17 @@
 VENV = venv/bin
+PYTHON = python3
+SOURCES = maze_generator
 
 install:
-	$(VENV)/pip install -r requirements.txt 
+	$(PYTHON) -m venv venv
+	$(VENV)/pip install --upgrade pip
+	$(VENV)/pip install -r requirements.txt
 
 run:
-	$(VENV)/python3 a_maze_ing.py config.txt 
+	$(VENV)/$(PYTHON) -m $(SOURCES).a_maze_ing config.txt
 
 debug:
-	$(VENV)/python3 -m pdb a_maze_ing.py config.txt
+	$(VENV)/$(PYTHON) -m pdb $(SOURCES)/a_maze_ing.py config.txt
 
 clean:
 	rm -rf __pycache__ .mypy_cache
@@ -19,3 +23,8 @@ lint:
 lint-strict:
 	$(VENV)/flake8 .
 	$(VENV)/mypy --strict .
+
+test:
+	$(VENV)/$(PYTHON) -m $(SOURCES).a_maze_ing test/test_config.txt
+
+.PHONY: test install run debug clean lint lint-strict

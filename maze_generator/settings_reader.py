@@ -30,9 +30,9 @@ class SettingsReader:
 
     @staticmethod
     def Read(path: str | None) -> MazeSettings:
+        if path is None:
+            return defaultSettings
         try:
-            if path is None:
-                return defaultSettings
             with open(path, "r") as file:
                 settings: dict[str, str] = dict[str, str]()
                 for line in file:

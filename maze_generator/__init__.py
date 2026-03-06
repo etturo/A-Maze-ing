@@ -19,4 +19,3 @@ from maze_generator.maze import Maze
 from maze_generator.settings_reader import (MazeSettings,
                                             SettingsReader,
                                             InvalidFormat)
-
