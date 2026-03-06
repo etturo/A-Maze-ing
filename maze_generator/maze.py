@@ -18,18 +18,15 @@ class Maze:
     def __str__(self):
         return self.serialize()
 
-    def serialize(self) -> str:
-        maze_str: str = ""
+    def serialize(self) -> None:
+        with open(self.__settings['OUTPUT_FILE'], 'w') as file:
+            for line in self.__map:
+                for row in line:
+                    file.write(hex(row.walls)[2:])
+                file.write("\n")
 
-        for line in self.__map:
-            for row in line:
-                maze_str += hex(row.walls)[2:]
-            maze_str += "\n"
+            file.write('\n' + self.__settings['ENTRY'])
+            file.write('\n' + self.__settings['EXIT'] + '\n')
 
-        maze_str += '\n' + self.__settings['ENTRY']
-        maze_str += '\n' + self.__settings['EXIT'] + '\n'
-
-        for direction in self.__solution:
-            maze_str += str(direction)
-
-        return maze_str
+            for direction in self.__solution:
+                file.write(str(direction))
