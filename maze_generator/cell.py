@@ -13,20 +13,14 @@ class Direction(IntEnum):
 
 
 class Cell:
-    full_cell: str = "▆"
-    empty_cell: str = " "
+    full_cell: str = "██"
+    empty_cell: str = "  "
 
     def __init__(self, full: bool) -> None:
         self.full = full
 
     def SetNeighbors(self, neighbors: Dict[Direction, "Cell"]):
         self.__neighbors = neighbors
-
-    def HasWall(self, dir: Direction) -> bool:
-        return (self.walls & dir) != 0
-
-    def __setitem__(self, d: Direction, value: bool):
-        self.walls = (self.walls | d) if value else (self.walls & ~d)
 
     def IsFull(self):
         return self.full
@@ -37,3 +31,6 @@ class Cell:
                    n[Direction.EAST].IsFull() * Direction.EAST +
                    n[Direction.SOUTH].IsFull() * Direction.SOUTH +
                    n[Direction.WEST].IsFull() * Direction.WEST)
+
+    def get_sprite(self) -> str:
+        return (Cell.full_cell if self.full else Cell.empty_cell)

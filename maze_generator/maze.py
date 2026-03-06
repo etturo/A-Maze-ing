@@ -31,8 +31,18 @@ class Maze:
                     Cell(True)
                 })
 
-    def __str__(self):
-        return self.serialize()
+    def __str__(self) -> str:
+        maze_str: str = Cell.full_cell * (int(self.__settings['WIDTH']) + 2)
+        maze_str += '\n'
+
+        for row in self.__map:
+            maze_str += Cell.full_cell
+            for chr in row:
+                maze_str += chr.get_sprite()
+            maze_str += Cell.full_cell
+            maze_str += '\n'
+
+        return maze_str + Cell.full_cell * (int(self.__settings['WIDTH']) + 2)
 
     def serialize(self) -> None:
         with open(self.__settings['OUTPUT_FILE'], 'w') as file:

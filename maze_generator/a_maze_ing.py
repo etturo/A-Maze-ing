@@ -8,6 +8,7 @@ def a_maze_ing() -> None:
         sys.argv[1] if len(sys.argv) > 1 else None)
     maze = Maze(settings)
     maze.serialize()
+    print(maze)
 
 
 if __name__ == "__main__":
