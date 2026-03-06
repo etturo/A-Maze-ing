@@ -7,6 +7,9 @@ class Direction(IntEnum):
     SOUTH = 4
     WEST = 8
 
+    def __str__(self):
+        return self.name[0]
+
 
 class Cell:
     def __init__(self, wall: int) -> None:

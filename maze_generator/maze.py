@@ -1,12 +1,13 @@
 from maze_generator.settings_reader import MazeSettings
-from maze_generator.cell import Cell
+from maze_generator.cell import Cell, Direction
 from typing import List
 
 
 class Maze:
     def __init__(self, settings: MazeSettings):
         self.__settings: MazeSettings = settings
-        self.__map: list[list[Cell]] = []
+        self.__map: List[list[Cell]] = []
+        self.__solution: List[Direction] = []
 
         for height in range(int(self.__settings['HEIGHT'])):
             row: List[Cell] = list()
@@ -24,5 +25,11 @@ class Maze:
             for row in line:
                 maze_str += hex(row.walls)[2:]
             maze_str += "\n"
+
+        maze_str += '\n' + self.__settings['ENTRY']
+        maze_str += '\n' + self.__settings['EXIT'] + '\n'
+
+        for direction in self.__solution:
+            maze_str += str(direction)
 
         return maze_str
