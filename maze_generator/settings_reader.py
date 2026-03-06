@@ -10,8 +10,8 @@ class MazeSettings:
 
     def __init__(self, settings: dict[str, str]) -> None:
         self.settings = settings
-        self.__check_validity({"WIDTH", "HEIGHT", "ENTRY",
-                               "EXIT", "OUTPUT_FILE", "PERFECT"})
+        self.__check_validity(["WIDTH", "HEIGHT", "ENTRY",
+                               "EXIT", "OUTPUT_FILE", "PERFECT"])
 
     def __getitem__(self, key):
         return self.settings[key]
@@ -27,7 +27,7 @@ class SettingsReader:
             raise InvalidFormat(f"Invalid format in line: '{line}'") from e
 
     @staticmethod
-    def Read(path: str) -> MazeSettings:
+    def Read(path: str = "config.txt") -> MazeSettings:
         with open(path, "r") as file:
             settings: dict[str, str] = dict[str, str]()
             for line in file:

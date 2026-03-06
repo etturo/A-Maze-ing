@@ -9,11 +9,11 @@ class Direction(IntEnum):
 
 
 class Cell:
-    def __init__(self) -> None:
-        self.walls: int = 0
+    def __init__(self, wall: int) -> None:
+        self.walls: int = wall
 
     def HasWall(self, dir: Direction) -> bool:
         return (self.walls & dir) != 0
 
     def __setitem__(self, d: Direction, value: bool):
-        self.walls = (self.walls | d) if value else (self.walls & (15 & ~d))
+        self.walls = (self.walls | d) if value else (self.walls & ~d)
