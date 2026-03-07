@@ -25,6 +25,7 @@ lint-strict:
 	$(VENV)/mypy --strict .
 
 test:
+	@clear
 	$(VENV)/$(PYTHON) -m $(SOURCES).a_maze_ing test/test_config.txt
 
 .PHONY: test install run debug clean lint lint-strict

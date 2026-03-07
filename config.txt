@@ -1,6 +1,10 @@
+#GENERAL SETTINGS
 WIDTH=20
 HEIGHT=15
 ENTRY=0,0
 EXIT=20,15
 OUTPUT_FILE=output_maze.txt
 PERFECT=True
+
+#GRAPHICS
+WALL_CHARACTERS=╔╦═╗║╠═╬╣╚╩═╝

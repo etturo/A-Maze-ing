@@ -1,7 +1,12 @@
-
-
 class InvalidFormat(Exception):
     pass
+
+
+class WallGraphics():
+    def __init__(self, wall_str: str) -> None:
+        self.left = wall_str[4]
+        self.top = wall_str[2]
+        # TODO: Setup the other walls
 
 
 class MazeSettings:
@@ -14,6 +19,8 @@ class MazeSettings:
         self.settings = settings
         self.__check_validity(["WIDTH", "HEIGHT", "ENTRY",
                                "EXIT", "OUTPUT_FILE", "PERFECT"])
+        self.wall_graphics: WallGraphics = \
+            WallGraphics(settings["WALL_CHARACTERS"])
 
     def __getitem__(self, key: str) -> str:
         return self.settings[key]
@@ -36,6 +43,8 @@ class SettingsReader:
             with open(path, "r") as file:
                 settings: dict[str, str] = dict[str, str]()
                 for line in file:
+                    if (line.isspace() or line.strip().startswith("#")):
+                        continue
                     try:
                         key, value = SettingsReader.__split_line(line)
                         settings[key] = value
@@ -52,4 +61,6 @@ defaultSettings: MazeSettings = MazeSettings({'WIDTH': '20',
                                               'ENTRY': '0,0',
                                               'EXIT': '20,15',
                                               'OUTPUT_FILE': 'output_maze.txt',
-                                              'PERFECT': 'FALSE'})
+                                              'PERFECT': 'FALSE',
+                                              'WALL_CHARACTERS':
+                                              '╔╦═╗║╠═╬╣╚╩═╝'})
