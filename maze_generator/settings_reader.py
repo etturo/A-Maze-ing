@@ -1,12 +1,34 @@
+from enum import IntEnum
+
+
 class InvalidFormat(Exception):
     pass
 
 
+class WallType(IntEnum):
+    TOP_LEFT = 0
+    TOP_CROSS = 1
+    TOP = 2
+    TOP_RIGHT = 3
+    RIGHT = 4
+    LEFT = RIGHT
+    BOT = TOP
+    LEFT_CROSS = 5
+    CROSS = 6
+    RIGHT_CROSS = 7
+    BOT_LEFT = 8
+    BOT_CROSS = 9
+    BOT_RIGHT = 10
+
+
 class WallGraphics():
     def __init__(self, wall_str: str) -> None:
-        self.left = wall_str[4]
-        self.top = wall_str[2]
-        # TODO: Setup the other walls
+        self.__graphics: dict[WallType, str] = dict()
+        for key in WallType:
+            self.__graphics[key] = wall_str[key]
+
+    def __getitem__(self, key: WallType):
+        return self.__graphics[key]
 
 
 class MazeSettings:

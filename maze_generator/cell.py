@@ -1,5 +1,5 @@
 from enum import IntEnum
-from maze_generator.settings_reader import WallGraphics
+from maze_generator.settings_reader import WallGraphics, WallType
 
 
 class InvalidCellOperation(Exception):
@@ -23,6 +23,14 @@ class Cell:
         self.walls: int = walls
         self.wall_graphics = wall_graphics
 
+    @staticmethod
+    def DirectionToWall(dir: Direction) -> WallType:
+        match(dir):
+            case Direction.NORTH: return WallType.TOP
+            case Direction.WEST: return WallType.LEFT
+            case Direction.EAST: return WallType.RIGHT
+            case Direction.SOUTH: return WallType.BOT
+
     def HasWall(self, dir: Direction) -> bool:
         return ((self.walls | self.invincible_walls) & dir) != 0
 
@@ -31,24 +39,11 @@ class Cell:
             raise InvalidCellOperation("Tried deleting and invincible wall")
         self.walls = (self.walls | d) if value else (self.walls & ~d)
 
-    # Pretty sure this could be written better, logic is ok though
-    def GetGraphics(self, dir: Direction) -> str:
-        match (dir):
-            case Direction.NORTH:
-                return (self.wall_graphics.top
-                        if self.HasWall(Direction.NORTH) else " ")
-            case Direction.EAST:
-                return (self.wall_graphics.left
-                        if self.HasWall(Direction.EAST) else " ")
-            case Direction.SOUTH:
-                return (self.wall_graphics.top
-                        if self.HasWall(Direction.SOUTH) else " ")
-            case Direction.WEST:
-                return (self.wall_graphics.left
-                        if self.HasWall(Direction.WEST) else " ")
-
     def Serialize(self) -> str:
         return str(hex(self.walls | self.invincible_walls))
+
+    def GetWallSprite(self, dir: Direction) -> str:
+        return self.wall_graphics[self.DirectionToWall(dir)] if self.HasWall(dir) else " "
 
     @staticmethod
     def AddWall(walls: int, dir: Direction) -> int:
