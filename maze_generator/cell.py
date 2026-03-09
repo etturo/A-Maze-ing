@@ -75,3 +75,6 @@ class ReadonlyCell:
     @property
     def invincible_walls(self):
         return self.cell.invincible_walls
+
+    def HasWall(self, dir: Direction) -> bool:
+        return ((self.walls | self.invincible_walls) & dir) != 0

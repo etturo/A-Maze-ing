@@ -107,4 +107,4 @@ defaultSettings: MazeSettings = MazeSettings({'WIDTH': '20',
                                               'OUTPUT_FILE': 'output_maze.txt',
                                               'PERFECT': 'FALSE',
                                               'WALL_CHARACTERS':
-                                              'E║═╝║║╗╠═╚═╩╔╠╦╬'})
+                                              ' ╨╞╚╥║╔╠╡╝═╩╗╣╦╬'})

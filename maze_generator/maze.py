@@ -34,7 +34,7 @@ class MazeRender:
             for x in range(self.__maze.width):
                 rx: int = x * 2 + 1
                 ry: int = y * 2 + 1
-                cell: Cell = self.__maze[x, y]
+                cell: ReadonlyCell = self.__maze[x, y]
                 n = cell.HasWall(Direction.NORTH)
                 w = cell.HasWall(Direction.WEST)
                 e = cell.HasWall(Direction.EAST)
@@ -53,7 +53,9 @@ class MazeRender:
         s = self.__settings
         for y in range(self.__h):
             for x in range(self.__w):
-                result += s[self.__get_neighbor(x, y)]
+                char = s[self.__get_neighbor(x, y)]
+                # Doubles Every odd indexed character to fix vertical stretch
+                result += char * (2 if x % 2 == 1 else 1)
             result += "\n"
 
         return result
