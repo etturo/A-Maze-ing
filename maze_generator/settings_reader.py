@@ -6,19 +6,27 @@ class InvalidFormat(Exception):
 
 
 class WallType(IntEnum):
-    TOP_LEFT = 0
-    TOP_CROSS = 1
-    TOP = 2
-    TOP_RIGHT = 3
-    RIGHT = 4
-    LEFT = RIGHT
-    BOT = TOP
-    LEFT_CROSS = 5
-    CROSS = 6
-    RIGHT_CROSS = 7
-    BOT_LEFT = 8
-    BOT_CROSS = 9
-    BOT_RIGHT = 10
+    EMPTY = 0
+    # Straight/Ends
+    NORTH_ONLY = 1
+    EAST_ONLY = 2
+    SOUTH_ONLY = 4
+    WEST_ONLY = 8
+    # Corners
+    BOT_RIGHT = 9   # North(1) + East(2)
+    TOP_RIGHT = 12   # East(2) + South(4)
+    TOP_LEFT = 6  # South(4) + West(8)
+    BOT_LEFT = 3   # West(8) + North(1)
+    # Straights
+    VERTICAL = 5   # North(1) + South(4)
+    HORIZONTAL = 10  # East(2) + West(8)
+    # T-Crosses
+    T_DOWN = 14  # E(2)+S(4)+W(8)
+    T_UP = 11  # W(8)+N(1)+E(2)
+    T_LEFT = 13  # N(1)+S(4)+W(8)
+    T_RIGHT = 7   # N(1)+E(2)+S(4)
+    # Full Cross
+    CROSS = 15  # N+E+S+W
 
 
 class WallGraphics():
@@ -32,10 +40,20 @@ class WallGraphics():
 
 
 class MazeSettings:
+    def __inside(self, t: tuple[int, int]) -> bool:
+        return (t[0] > int(self.settings["WIDTH"]) or
+                t[0] < 0 or
+                t[1] > int(self.settings["HEIGHT"]) or
+                t[1] < 0)
+
     def __check_validity(self, mandatory: list[str]) -> None:
         for element in mandatory:
             if (self.settings.get(element) is None):
                 raise InvalidFormat(f"Missing {element} field")
+        if self.__inside(SettingsReader.CommaToTuple(self.settings["ENTRY"])):
+            raise InvalidFormat(f"Invalid 'ENTRY': {element}")
+        if self.__inside(SettingsReader.CommaToTuple(self.settings["EXIT"])):
+            raise InvalidFormat(f"Invalid 'EXIT': {element}")
 
     def __init__(self, settings: dict[str, str]) -> None:
         self.settings = settings
@@ -77,6 +95,10 @@ class SettingsReader:
             print(f"Couldn't open {path}")
             return defaultSettings
 
+    @staticmethod
+    def CommaToTuple(comma: str) -> tuple[int, int]:
+        return tuple(map(int, comma.split(',')))
+
 
 defaultSettings: MazeSettings = MazeSettings({'WIDTH': '20',
                                               'HEIGHT': '15',
@@ -85,4 +107,4 @@ defaultSettings: MazeSettings = MazeSettings({'WIDTH': '20',
                                               'OUTPUT_FILE': 'output_maze.txt',
                                               'PERFECT': 'FALSE',
                                               'WALL_CHARACTERS':
-                                              '╔╦═╗║╠═╬╣╚╩═╝'})
+                                              'E║═╝║║╗╠═╚═╩╔╠╦╬'})

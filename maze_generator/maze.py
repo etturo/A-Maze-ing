@@ -1,62 +1,70 @@
-from maze_generator.settings_reader import MazeSettings
-from maze_generator.cell import Cell, Direction
+from maze_generator.settings_reader import MazeSettings, WallGraphics
+from maze_generator.cell import Cell, Direction, ReadonlyCell
 from typing import List
 
 
 class MazeRender:
-    def __init__(self, maze: "Maze") -> None:
-        self.__render_width = maze.width*2+1
-        self.__render_height = maze.height*2+1
-        self.maze = maze
-        self.render: list[list[str]] = list()
+    def __init__(self, maze: "Maze", settings: WallGraphics) -> None:
+        self.__maze = maze
+        self.__settings = settings
+        self.__w = maze.width * 2 + 1
+        self.__h = maze.height * 2 + 1
 
-        for y in range(self.__render_height):
-            row: list[list[str]] = list()
-            for x in range(self.__render_width):
-                row.append(" ")
-            self.render.append(row)
+        self.__render = [[False] * self.__w for _ in range(self.__h)]
+
+    def __check_wall(self, x: int, y: int) -> bool:
+        return (x >= 0 and x < self.__w and
+                y >= 0 and y < self.__h and
+                self.__render[y][x])
 
     def __get_neighbor(self, x: int, y: int) -> int:
+        if not self.__render[y][x]:
+            return 0
         result: int = 0
-        result |= Direction.NORTH if y > 0 and self.render[y-1][x] != " " else 0
-        result |= Direction.EAST if x < self.__render_width-1 and self.render[y][x+1] != " " else 0
-        result |= Direction.SOUTH if y < self.__render_height-1 and self.render[y+1][x] != " " else 0
-        result |= Direction.WEST if x > 0 and self.render[y][x-1] != " " else 0
+
+        result |= Direction.NORTH if self.__check_wall(x, y-1) else 0
+        result |= Direction.EAST if self.__check_wall(x+1, y) else 0
+        result |= Direction.SOUTH if self.__check_wall(x, y+1) else 0
+        result |= Direction.WEST if self.__check_wall(x-1, y) else 0
         return result
 
     def Render(self) -> str:
-        for y in range(self.maze.height):
-            for x in range(self.maze.width):
+        result: str = ""
+        for y in range(self.__maze.height):
+            for x in range(self.__maze.width):
                 rx: int = x * 2 + 1
                 ry: int = y * 2 + 1
-                self.render[ry][rx] = "."
-                self.render[ry-1][rx] = self.maze.GetCell(x, y).GetWallSprite(Direction.NORTH)
-                self.render[ry][rx-1] = self.maze.GetCell(x, y).GetWallSprite(Direction.WEST)
-                self.render[ry][rx+1] = self.maze.GetCell(x, y).GetWallSprite(Direction.EAST)
-                self.render[ry+1][rx] = self.maze.GetCell(x, y).GetWallSprite(Direction.SOUTH)
+                cell: Cell = self.__maze[x, y]
+                n = cell.HasWall(Direction.NORTH)
+                w = cell.HasWall(Direction.WEST)
+                e = cell.HasWall(Direction.EAST)
+                s = cell.HasWall(Direction.SOUTH)
 
-        for y in range(1, self.__render_height, 2):
-            for x in range(1, self.__render_width, 2):
-                self.render[y-1][x-1] = str(self.__get_neighbor(x-1,y-1))
-                self.render[y-1][x+1] = str(self.__get_neighbor(x+1,y-1))
-                self.render[y+1][x-1] = str(self.__get_neighbor(x-1,y+1))
-                self.render[y+1][x+1] = str(self.__get_neighbor(x+1,y+1))
+                self.__render[ry-1][rx] |= n
+                self.__render[ry][rx-1] |= w
+                self.__render[ry][rx+1] |= e
+                self.__render[ry+1][rx] |= s
 
-        return "\n".join("".join(row) for row in self.render)
+                self.__render[ry-1][rx-1] |= n or w
+                self.__render[ry-1][rx+1] |= n or e
+                self.__render[ry+1][rx-1] |= s or w
+                self.__render[ry+1][rx+1] |= s or e
+
+        s = self.__settings
+        for y in range(self.__h):
+            for x in range(self.__w):
+                result += s[self.__get_neighbor(x, y)]
+            result += "\n"
+
+        return result
 
 
 class Maze:
     def __getBorder(self, x: int, y: int) -> int:
-        wall_border: int = 0x0
-        if (x == 0):
-            wall_border = Cell.AddWall(wall_border, Direction.WEST)
-        if (y == 0):
-            wall_border = Cell.AddWall(wall_border, Direction.NORTH)
-        if (x == self.width - 1):
-            wall_border = Cell.AddWall(wall_border, Direction.EAST)
-        if (y == self.height - 1):
-            wall_border = Cell.AddWall(wall_border, Direction.SOUTH)
-        return wall_border
+        return ((Direction.WEST if x == 0 else 0) |
+                (Direction.NORTH if y == 0 else 0) |
+                (Direction.EAST if x == self.width - 1 else 0) |
+                (Direction.SOUTH if y == self.height - 1 else 0))
 
     def __init__(self, settings: MazeSettings):
         self.__settings: MazeSettings = settings
@@ -64,7 +72,7 @@ class Maze:
         self.width: int = int(self.__settings['WIDTH'])
         self.height: int = int(self.__settings['HEIGHT'])
         self.__solution: List[Direction] = []
-        self.render = MazeRender(self)
+        self.render = MazeRender(self, settings.wall_graphics)
 
         for y in range(self.height):
             row: List[Cell] = list()
@@ -90,5 +98,10 @@ class Maze:
             for direction in self.__solution:
                 file.write(str(direction))
 
-    def GetCell(self, x: int, y: int) -> Cell:
-        return self.__map[y][x]
+    def __getitem__(self, pos: tuple[int, int]) -> ReadonlyCell:
+        x, y = pos
+        return ReadonlyCell(self.__map[y][x])
+
+    def AddWall(self, x: int, y: int, wall: Direction) -> None:
+        self.__map[y][x] += wall
+        self.__map[y+wall.vector[1]][x+wall.vector[0]] += wall.opposite

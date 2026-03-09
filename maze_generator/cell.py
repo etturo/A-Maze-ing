@@ -1,5 +1,5 @@
 from enum import IntEnum
-from maze_generator.settings_reader import WallGraphics, WallType
+from maze_generator.settings_reader import WallGraphics
 
 
 class InvalidCellOperation(Exception):
@@ -15,6 +15,26 @@ class Direction(IntEnum):
     def __str__(self):
         return self.name[0]
 
+    @property
+    def vector(self) -> tuple[int, int]:
+        mapping = {
+            Direction.NORTH: (0, -1),
+            Direction.SOUTH: (0, 1),
+            Direction.EAST:  (1, 0),
+            Direction.WEST:  (-1, 0),
+        }
+        return mapping[self]
+
+    @property
+    def opposite(self) -> "Direction":
+        mapping = {
+            Direction.NORTH: Direction.SOUTH,
+            Direction.SOUTH: Direction.NORTH,
+            Direction.EAST:  Direction.WEST,
+            Direction.WEST:  Direction.EAST,
+        }
+        return mapping[self]
+
 
 class Cell:
     def __init__(self, wall_graphics: WallGraphics, walls: int = 0xF,
@@ -22,14 +42,6 @@ class Cell:
         self.invincible_walls: int = invicible_walls
         self.walls: int = walls
         self.wall_graphics = wall_graphics
-
-    @staticmethod
-    def DirectionToWall(dir: Direction) -> WallType:
-        match(dir):
-            case Direction.NORTH: return WallType.TOP
-            case Direction.WEST: return WallType.LEFT
-            case Direction.EAST: return WallType.RIGHT
-            case Direction.SOUTH: return WallType.BOT
 
     def HasWall(self, dir: Direction) -> bool:
         return ((self.walls | self.invincible_walls) & dir) != 0
@@ -42,9 +54,24 @@ class Cell:
     def Serialize(self) -> str:
         return str(hex(self.walls | self.invincible_walls))
 
-    def GetWallSprite(self, dir: Direction) -> str:
-        return self.wall_graphics[self.DirectionToWall(dir)] if self.HasWall(dir) else " "
+    def __iadd__(self, dir: Direction) -> "Cell":
+        self.walls |= dir
+        return self
 
     @staticmethod
     def AddWall(walls: int, dir: Direction) -> int:
         return walls | dir
+
+
+# Directly modifying a cell is dangerous cause the maze could become incoherent
+class ReadonlyCell:
+    def __init__(self, cell: Cell) -> None:
+        self.cell = cell
+
+    @property
+    def walls(self):
+        return self.cell.walls
+
+    @property
+    def invincible_walls(self):
+        return self.cell.invincible_walls

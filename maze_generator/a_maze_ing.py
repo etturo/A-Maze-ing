@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 from maze_generator import SettingsReader, MazeSettings, Maze
 import sys
-from maze_generator.cell import Direction
+# from maze_generator.cell import Direction
 
 
 def a_maze_ing() -> None:
     settings: MazeSettings = SettingsReader().Read(
         sys.argv[1] if len(sys.argv) > 1 else None)
     maze = Maze(settings)
-    maze.GetCell(10, 10)[Direction.NORTH] = True
     maze.Serialize()
     print(maze)
 

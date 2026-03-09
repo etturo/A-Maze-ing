@@ -7,4 +7,4 @@ OUTPUT_FILE=output_maze.txt
 PERFECT=True
 
 #GRAPHICS
-WALL_CHARACTERS=╔╦═╗║╠═╬╣╚╩═╝
+WALL_CHARACTERS=E║═╝║║╗╠═╚═╩╔╠╦╬
